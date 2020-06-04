@@ -1,0 +1,47 @@
+﻿@page "/StateChanged"
+
+@using Microsoft.AspNetCore.Components.Server.Circuits
+@using BlazorServerApp
+
+@inject CircuitHandler circuitHandler
+@implements IDisposable
+
+<h1>Hello, world!</h1>
+
+<p>
+    Number of Circuits: @((circuitHandler as
+    BlazorServerApp.TrackingCircuitHandler).Circuits.Count)
+    <ul>
+        @foreach (var circuit in (circuitHandler as
+             BlazorServerApp.TrackingCircuitHandler).Circuits)
+        {
+            <li>@circuit.Key</li>
+        }
+    </ul>
+</p>
+
+@code {
+
+    protected override void OnInitialized()
+    {
+        // register event handler
+        (circuitHandler as TrackingCircuitHandler).CircuitsChanged +=
+                                              HandleCircuitsChanged;
+    }
+
+    public void Dispose()
+    {
+        // unregister the event handler when the component is destroyed
+        (circuitHandler as TrackingCircuitHandler).CircuitsChanged -=
+                                                 HandleCircuitsChanged;
+        //(circuitHandler as
+        //     BlazorServerApp.TrackingCircuitHandler).Circuits.Remove())
+
+    }
+
+    public void HandleCircuitsChanged(object sender, EventArgs args)
+    {
+        // notify the UI that the state has changed
+        InvokeAsync(() => StateHasChanged());
+    }
+}
